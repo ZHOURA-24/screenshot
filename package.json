@@ -1,0 +1,8 @@
+{
+    "type": "module",
+    "dependencies": {
+        "axios": "^1.11.0",
+        "form-data": "^4.0.4",
+        "image-js": "^0.37.0"
+    }
+}
