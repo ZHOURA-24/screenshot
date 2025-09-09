@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-version      '1.0.0'
+version '1.0.0'
 
 author 'ZHOURA-24'
 
@@ -23,3 +23,5 @@ server_scripts {
 }
 
 ui_page 'web/dist/index.html'
+
+provide 'screenshot-basic'

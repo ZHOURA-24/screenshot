@@ -1,15 +1,20 @@
 local ids = {}
 
-exports('TakeScreenshot', function(source, cb)
+local function TakeScreenshot(source, cb)
     if source then
         ids[source] = {
             cb = cb,
-            time = os.time()
+            time = os.time(),
+            p = promise.new()
         }
 
         TriggerClientEvent('screenshot:client:TakeScreenshot', source)
+
+        return Citizen.Await(ids[source].p)
     end
-end)
+end
+
+exports('TakeScreenshot', TakeScreenshot)
 
 RegisterNetEvent('screenshot:server:TakeScreenshot', function(data)
     local source = source
@@ -21,6 +26,8 @@ RegisterNetEvent('screenshot:server:TakeScreenshot', function(data)
             id.cb(data)
         end
 
+        id.p:resolve(data)
+
         local length = #data
         local duration = os.time() - id.time
 
@@ -29,14 +36,41 @@ RegisterNetEvent('screenshot:server:TakeScreenshot', function(data)
 end)
 
 RegisterCommand('testssserver', function(source)
-    local resourceName = GetCurrentResourceName()
     local url = 'https://fmapi.net/api/v2/image';
     local headers = {
         ['Authorization'] = GetConvar('SCREENSHOT_TOKEN', ''),
     }
-    exports[resourceName]:TakeScreenshot(source, function(data)
-        local removedGreenScreen = exports[resourceName]:RemoveGreenScreen(data)
-        local test = exports[resourceName]:UploadScreenshot(url, headers, removedGreenScreen)
+    TakeScreenshot(source, function(data)
+        local removedGreenScreen = exports[cache.resource]:RemoveGreenScreen(data)
+        local test = exports[cache.resource]:UploadScreenshot(url, headers, removedGreenScreen)
         print(json.encode(test, { indent = true }))
     end)
 end, false)
+
+function CreateResourceExport(resource, name, cb)
+    AddEventHandler(('__cfx_export_%s_%s'):format(resource, name), function(setCB)
+        setCB(cb)
+    end)
+end
+
+-- screenshot-basic
+
+lib.callback.register('screenshot:server:ScreenshotUpload', function(source, url, _, options)
+    local data = TakeScreenshot(source)
+    if data then
+        local removedGreenScreen = exports[cache.resource]:RemoveGreenScreen(data)
+        local headers = options.headers or {}
+        local result = exports[cache.resource]:UploadScreenshot(url, headers, removedGreenScreen)
+        return json.encode(result)
+    end
+end)
+
+CreateResourceExport('screenshot-basic', 'requestClientScreenshot', function(source, _, _, cb)
+    local data = TakeScreenshot(source)
+
+    if cb then
+        return cb(nil, data)
+    end
+
+    cb(true)
+end)

@@ -35,3 +35,19 @@ RegisterCommand('screenshottest', function()
     local data = TakeScreenshot()
     print(data)
 end, false)
+
+function CreateResourceExport(resource, name, cb)
+    AddEventHandler(('__cfx_export_%s_%s'):format(resource, name), function(setCB)
+        setCB(cb)
+    end)
+end
+
+-- screenshot-basic
+
+-- not recommended
+CreateResourceExport('screenshot-basic', 'requestScreenshotUpload', function(url, fields, options, cb)
+    local data = lib.callback.await('screenshot:server:ScreenshotUpload', false, url, fields, options)
+    if cb then
+        cb(data)
+    end
+end)
