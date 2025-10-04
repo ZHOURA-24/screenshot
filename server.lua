@@ -47,20 +47,13 @@ RegisterCommand('testssserver', function(source)
     end)
 end, false)
 
-function CreateResourceExport(resource, name, cb)
-    AddEventHandler(('__cfx_export_%s_%s'):format(resource, name), function(setCB)
-        setCB(cb)
-    end)
-end
-
 -- screenshot-basic
 
-lib.callback.register('screenshot:server:ScreenshotUpload', function(source, url, _, options)
+lib.callback.register('screenshot:server:ScreenshotUpload', function(source, url, fields, options)
     local data = TakeScreenshot(source)
     if data then
-        local removedGreenScreen = exports[cache.resource]:RemoveGreenScreen(data)
-        local headers = options.headers or {}
-        local result = exports[cache.resource]:UploadScreenshot(url, headers, removedGreenScreen)
+        local headers = options and options.headers or {}
+        local result = exports[cache.resource]:UploadScreenshot(url, headers, data, fields)
         return json.encode(result)
     end
 end)

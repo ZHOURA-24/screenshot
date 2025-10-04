@@ -28,12 +28,12 @@ async function removeGreenScreen(inputPath) {
 
 exports('RemoveGreenScreen', removeGreenScreen);
 
-async function uploadScreenshot(url, headers, screenshotData) {
+async function uploadScreenshot(url, headers, screenshotData, fields) {
 	try {
 		const buffer = Buffer.from(screenshotData.split(',')[1], 'base64');
 		const formData = new FormData();
 
-		formData.append('file', buffer, { filename: 'image.png' });
+		formData.append(fields || 'file', buffer, { filename: 'image.png' });
 
 		const response = await axios.post(url, formData, {
 			headers: headers,

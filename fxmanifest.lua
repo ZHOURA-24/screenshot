@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-version      '1.1.0'
+version '1.1.0'
 
 author 'ZHOURA-24'
 
@@ -15,7 +15,7 @@ files {
     'web/dist/**/*',
 }
 
-shared_script '@ox_lib/init.lua'
+shared_script { '@ox_lib/init.lua', 'shared.lua' }
 client_script 'client.lua'
 server_scripts {
     'server.lua',
