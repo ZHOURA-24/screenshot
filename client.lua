@@ -23,7 +23,7 @@ RegisterNUICallback('screenshot', function(data, cb)
         screenshotPromise = nil
         if server then
             server = nil
-            TriggerLatentServerEvent('screenshot:server:TakeScreenshot', 600000, data)
+            TriggerLatentServerEvent('screenshot:server:TakeScreenshot', #data, data)
         end
     end
     cb(true)

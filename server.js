@@ -5,25 +5,28 @@ const axios = require('axios');
 let FormData = require('form-data');
 
 async function removeGreenScreen(inputPath) {
-	const image = await Image.load(inputPath);
+  const image = await Image.load(inputPath)
 
-	image.resize({
-		width: image.width,
-		height: image.height,
-		fill: 'transparent',
-	});
+  const width = image.width
+  const height = image.height
+  const newImage = new Image(width, height, { kind: 'RGBA' })
 
-	image.data.forEach((_, index) => {
-		const r = image.data[index * 4];
-		const g = image.data[index * 4 + 1];
-		const b = image.data[index * 4 + 2];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const [r, g, b] = image.getPixelXY(x, y)
 
-		if (r < 100 && g > 150 && b < 100) {
-			image.data[index * 4 + 3] = 0;
-		}
-	});
+      const isGreenScreen =
+        g > r + 20 && g > b + 20 && g > 100 && r < 120 && b < 120
 
-	return image.toDataURL();
+      if (isGreenScreen) {
+        newImage.setPixelXY(x, y, [0, 0, 0, 0])
+      } else {
+        newImage.setPixelXY(x, y, [r, g, b, 255])
+      }
+    }
+  }
+
+  return newImage.toDataURL()
 }
 
 exports('RemoveGreenScreen', removeGreenScreen);
