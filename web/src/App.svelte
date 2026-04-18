@@ -5,6 +5,8 @@
 
 	let image = $state('');
 
+	const debug = false;
+
 	type ScreenshotOptions = {
 		quality: number;
 		type: string;
@@ -18,17 +20,19 @@
 			return;
 		}
 
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
+		canvas.width = window.innerWidth / 5;
+		canvas.height = window.innerHeight / 5;
 
 		renderGame(canvas);
 
 		const url = canvas.toDataURL(
 			`image/${options.type || 'png'}`,
-			options.quality || 0.5
+			options.quality || 0.5,
 		);
 		fetchNui('screenshot', url).then(() => {
-			image = url;
+			if (debug) {
+				image = url;
+			}
 		});
 
 		canvas = null;
@@ -36,9 +40,9 @@
 </script>
 
 <main>
-	<!-- {#if image}
+	{#if debug && image}
 		<img src={image} alt="screenshot" />
-	{/if} -->
+	{/if}
 </main>
 
 <style>
@@ -46,5 +50,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	img {
+		max-width: 50%;
+		max-height: 50%;
 	}
 </style>

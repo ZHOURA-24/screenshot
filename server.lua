@@ -19,18 +19,15 @@ exports('TakeScreenshot', TakeScreenshot)
 RegisterNetEvent('screenshot:server:TakeScreenshot', function(data)
     local source = source
     if ids[source] then
-        local id = ids[source]
-        ids[source] = nil
-
-        if id.cb then
-            id.cb(data)
+        if ids[source].cb then
+            ids[source].cb(data)
         end
 
-        id.p:resolve(data)
+        ids[source].p:resolve(data)
 
         local length = #data
-        local duration = os.time() - id.time
-
+        local duration = os.time() - ids[source].time
+        ids[source] = nil
         print(('Screenshot taken by %s (%d bytes, %d seconds)'):format(source, length, duration))
     end
 end)
