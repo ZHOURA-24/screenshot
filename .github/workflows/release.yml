@@ -35,9 +35,21 @@ jobs:
       # Install dependencies & Build
       - name: Install dependencies & Build
         run: |
+          bun install
+          bun run build
+
+      # Build web UI
+      - name: Build web UI
+        run: |
           cd web
-          bun install    # Install dependencies using Bun
-          bun run build  # Run the build script defined in your package.json
+          bun install
+          bun run build
+
+      # Remove build artifacts and dev files
+      - name: Clean up build files
+        run: |
+          rm -f package.json package-lock.json tsconfig.json build.ts yarn.lock bun.lockb
+          rm -rf node_modules server.ts
 
       # Generate changelog and determine version bump
       - name: Determine Version Bump

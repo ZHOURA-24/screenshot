@@ -1,8 +1,16 @@
 {
     "type": "module",
+    "scripts": {
+        "build": "bun run build.ts"
+    },
     "dependencies": {
         "axios": "^1.11.0",
         "form-data": "^4.0.4",
         "image-js": "^0.37.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.0.0",
+        "esbuild": "^0.24.0",
+        "typescript": "^5.0.0"
     }
 }
