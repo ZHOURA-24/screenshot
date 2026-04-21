@@ -96,8 +96,11 @@ jobs:
           # Remove unwanted directories (src and node_modules)
           rm -rf !(dist)
 
-          # Remove unwanted files .gitignore and .vscode
-          rm -f .gitignore .vscode
+          # Remove unwanted files .gitignore
+          rm -f .gitignore
+
+          # Remove .vscode directory
+          rm -rf .vscode
 
           # Navigate back to the parent directory
           cd ../..
