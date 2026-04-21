@@ -48,7 +48,7 @@ jobs:
       # Remove build artifacts and dev files
       - name: Clean up build files
         run: |
-          rm -f package.json package-lock.json tsconfig.json build.ts yarn.lock bun.lockb
+          rm -f package.json package-lock.json tsconfig.json build.ts yarn.lock bun.lock .gitignore
           rm -rf node_modules server.ts
 
       # Generate changelog and determine version bump
@@ -96,8 +96,8 @@ jobs:
           # Remove unwanted directories (src and node_modules)
           rm -rf !(dist)
 
-          # Remove unwanted files .gitignore
-          rm -f .gitignore
+          # Remove unwanted files .gitignore and .vscode
+          rm -f .gitignore .vscode
 
           # Navigate back to the parent directory
           cd ../..
