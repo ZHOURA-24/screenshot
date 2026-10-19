@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { renderGame } from './lib/rendergame';
+	import { onMount } from 'svelte';
+	import { renderGame, type GameView } from './lib/rendergame';
 	import { useNuiEvent } from './lib/hooks/useNuiEvent';
 	import { fetchNui } from './lib/utils/fetchNui';
 
@@ -12,30 +13,50 @@
 		type: string;
 	};
 
-	useNuiEvent<ScreenshotOptions>('takeScreenshot', (options) => {
-		let canvas: HTMLCanvasElement | null = document.createElement('canvas');
+	let gameView: GameView | null = null;
 
-		if (!canvas) {
-			console.error('Failed to create canvas');
-			return;
+	const getGameView = (): GameView => {
+		const width = Math.max(1, Math.floor(window.innerWidth / 5));
+		const height = Math.max(1, Math.floor(window.innerHeight / 5));
+
+		if (!gameView) {
+			const canvas = document.createElement('canvas');
+			canvas.width = width;
+			canvas.height = height;
+			gameView = renderGame(canvas);
+		} else {
+			gameView.resize(width, height);
 		}
 
-		canvas.width = window.innerWidth / 5;
-		canvas.height = window.innerHeight / 5;
+		return gameView;
+	};
 
-		renderGame(canvas);
-
-		const url = canvas.toDataURL(
-			`image/${options.type || 'png'}`,
-			options.quality || 0.5,
-		);
-		fetchNui('screenshot', url).then(() => {
-			if (debug) {
-				image = url;
-			}
+	onMount(() => {
+		const view = getGameView();
+		requestAnimationFrame(() => {
+			view.render();
 		});
+	});
 
-		canvas = null;
+	useNuiEvent<ScreenshotOptions>('takeScreenshot', (options) => {
+		const view = getGameView();
+
+		view.render();
+
+		requestAnimationFrame(() => {
+			view.render();
+
+			const url = view.canvas.toDataURL(
+				`image/${options?.type || 'png'}`,
+				options?.quality || 0.5,
+			);
+
+			fetchNui('screenshot', url).then(() => {
+				if (debug) {
+					image = url;
+				}
+			});
+		});
 	});
 </script>
 

@@ -123,31 +123,25 @@ const createGame = (gl: WebGLRenderingContext) => {
 	gl.enableVertexAttribArray(tloc);
 
 	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+	return { tex };
 };
 
-const render = (
-	gl: WebGLRenderingContext,
-	gameView: {
-		canvas: HTMLCanvasElement;
-		gl: WebGLRenderingContext;
-		animationFrame: number | undefined;
-	}
-) => {
-	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-	gl.finish();
-
-	gameView.animationFrame = requestAnimationFrame(() => {
-		render(gl, gameView);
-	});
+export type GameView = {
+	canvas: HTMLCanvasElement;
+	gl: WebGLRenderingContext;
+	render: () => void;
+	resize: (width: number, height: number) => void;
 };
 
-export const renderGame = (canvas: HTMLCanvasElement) => {
+export const renderGame = (canvas: HTMLCanvasElement): GameView => {
 	const gl = canvas.getContext('webgl', {
 		antialias: false,
 		depth: false,
 		stencil: false,
 		alpha: false,
 		desynchronized: true,
+		preserveDrawingBuffer: true,
 		failIfMajorPerformanceCaveat: false,
 	});
 
@@ -155,15 +149,29 @@ export const renderGame = (canvas: HTMLCanvasElement) => {
 		throw new Error('WebGL not supported');
 	}
 
-	const gameView = {
-		canvas,
-		gl,
-		animationFrame: undefined,
+	const { tex } = createGame(gl);
+
+	const render = () => {
+		gl.bindTexture(gl.TEXTURE_2D, tex);
+		gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		gl.finish();
 	};
 
-	createGame(gl);
+	const resize = (width: number, height: number) => {
+		if (canvas.width !== width || canvas.height !== height) {
+			canvas.width = width;
+			canvas.height = height;
+			gl.viewport(0, 0, width, height);
+		}
+	};
 
-	render(gl, gameView);
+	render();
 
-	return gameView;
+	return {
+		canvas,
+		gl,
+		render,
+		resize,
+	};
 };
