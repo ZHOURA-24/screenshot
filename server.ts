@@ -29,6 +29,8 @@ async function removeGreenScreen(inputPath: string): Promise<string> {
 
 exports('RemoveGreenScreen', removeGreenScreen);
 
+const retryableCodes = ['EPIPE', 'ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNABORTED'];
+
 async function uploadScreenshot(
 	url: string,
 	headers: Record<string, string>,
@@ -47,6 +49,7 @@ async function uploadScreenshot(
 			headers: {
 				...headers,
 				...formData.getHeaders(),
+				connection: 'close',
 			},
 			timeout: 60000,
 		};
@@ -55,8 +58,12 @@ async function uploadScreenshot(
 
 		return response.data;
 	} catch (error: unknown) {
-		const err = error as { code?: string; message?: string };
-		if (err.code === 'ECONNABORTED' && attempt < 5) {
+		const err = error as { code?: string; message?: string; response?: { status?: number } };
+		const status = err.response?.status;
+		const retryable =
+			retryableCodes.includes(err.code ?? '') || status === 429 || (status ?? 0) >= 500;
+
+		if (retryable && attempt < 5) {
 			await new Promise((resolve: (value: number) => void) =>
 				setTimeout(resolve, 500 * attempt),
 			);
@@ -69,7 +76,10 @@ async function uploadScreenshot(
 			);
 		}
 
-		console.error('Error uploading screenshot:', err.message);
+		console.error(
+			'Error uploading screenshot:',
+			`${url} attempt=${attempt} code=${err.code ?? '-'} status=${status ?? '-'} ${err.message}`,
+		);
 		throw error;
 	}
 }
